@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haydovchi Ma'lumotlarini Boshqarish</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input {
+            width: 97%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .container button{
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f5e7;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .delete-btn, .edit-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 5px;
+        }
+        .edit-btn {
+            background-color: #4CAF50;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row input {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Haydovchi Ma'lumotlarini Qo'shish</h1>
+    
+        <input type="text" id="name" placeholder="Haydovchi Ismi" />
+        <input type="text" id="surname" placeholder="Haydovchi Familiyasi" />
+        <input type="text" id="jshr" placeholder="Haydovchi JSHR" />
+        <input type="text" id="car_number" placeholder="Avtomobil Raqami" />
+        <input type="text" id="tech_passport_number" placeholder="Tex Pasporti Raqami" />
+        <button onclick="addDriver()">Ma'lumot Qo'shish</button>
+    
+        <div class="search-container">
+            <input type="text" id="searchQuery" placeholder="Qidirish..." oninput="searchDriver()" />
+            <button onclick="getDrivers()">Barcha Ma'lumotlarni Ko'rsatish</button>
+        </div>
+    
+        <table id="driversTable">
+            <thead>
+                <tr>
+                    <th>Ism</th>
+                    <th>Familiya</th>
+                    <th>JSHR</th>
+                    <th>Avtomobil Raqami</th>
+                    <th>Tex Pasporti Raqami</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody id="driversList">
+                <!-- Ma'lumotlar bu yerda ko'rsatiladi -->
+            </tbody>
+        </table>
+    </div>
+
+<script>
+// LocalStorage-dan ma'lumotlarni oling yoki bo'sh massiv yarating
+let drivers = JSON.parse(localStorage.getItem('drivers')) || [];
+
+// Haydovchi qo'shish funksiyasi
+function addDriver() {
+    const name = document.getElementById('name').value;
+    const surname = document.getElementById('surname').value;
+    const jshr = document.getElementById('jshr').value;
+    const car_number = document.getElementById('car_number').value;
+    const tech_passport_number = document.getElementById('tech_passport_number').value;
+
+    // Ma'lumotlar to'liq kiritilganligini tekshirish
+    if (!name || !surname || !jshr || !car_number || !tech_passport_number) {
+        alert("Iltimos, barcha maydonlarni to'ldiring!");
+        return;
+    }
+
+    // Yangi haydovchi ob'ektini yaratish
+    const newDriver = { name, surname, jshr, car_number, tech_passport_number, id: Date.now() };
+
+    // Yangi haydovchini massivga qo'shish
+    drivers.push(newDriver);
+    localStorage.setItem('drivers', JSON.stringify(drivers));
+
+    // Qo'shilgan ma'lumotlarni yangilash
+    clearForm();
+    displayDrivers();
+}
+
+// Ma'lumotlarni tozalash
+function clearForm() {
+    document.getElementById('name').value = '';
+    document.getElementById('surname').value = '';
+    document.getElementById('jshr').value = '';
+    document.getElementById('car_number').value = '';
+    document.getElementById('tech_passport_number').value = '';
+}
+
+// Haydovchilar ro'yxatini ko'rsatish
+function displayDrivers() {
+    const driversList = document.getElementById('driversList');
+    driversList.innerHTML = '';
+
+    drivers.forEach(driver => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${driver.name}</td>
+            <td>${driver.surname}</td>
+            <td>${driver.jshr}</td>
+            <td>${driver.car_number}</td>
+            <td>${driver.tech_passport_number}</td>
+            <td>
+                <button class="edit-btn" onclick="editDriver(${driver.id})">Tahrirlash</button>
+                <button class="delete-btn" onclick="deleteDriver(${driver.id})">O'chirish</button>
+            </td>
+        `;
+        driversList.appendChild(row);
+    });
+}
+
+// Ma'lumotni tahrirlash
+function editDriver(id) {
+    const driver = drivers.find(d => d.id === id);
+
+    if (driver) {
+        document.getElementById('name').value = driver.name;
+        document.getElementById('surname').value = driver.surname;
+        document.getElementById('jshr').value = driver.jshr;
+        document.getElementById('car_number').value = driver.car_number;
+        document.getElementById('tech_passport_number').value = driver.tech_passport_number;
+
+        deleteDriver(id); // Tahrir qilish uchun o'chirib tashlash
+    }
+}
+
+// Ma'lumotni o'chirish
+function deleteDriver(id) {
+    drivers = drivers.filter(driver => driver.id !== id);
+    localStorage.setItem('drivers', JSON.stringify(drivers));
+
+    displayDrivers();
+}
+
+// Qidirish funksiyasi
+function searchDriver() {
+    const query = document.getElementById('searchQuery').value.toLowerCase();
+    const filteredDrivers = drivers.filter(driver => {
+        return driver.name.toLowerCase().includes(query) ||
+               driver.surname.toLowerCase().includes(query) ||
+               driver.jshr.toLowerCase().includes(query) ||
+               driver.car_number.toLowerCase().includes(query) ||
+               driver.tech_passport_number.toLowerCase().includes(query);
+    });
+    displayFilteredDrivers(filteredDrivers);
+}
+
+// Filtrlangan ma'lumotlarni ko'rsatish
+function displayFilteredDrivers(filteredDrivers) {
+    const driversList = document.getElementById('driversList');
+    driversList.innerHTML = '';
+
+    filteredDrivers.forEach(driver => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${driver.name}</td>
+            <td>${driver.surname}</td>
+            <td>${driver.jshr}</td>
+            <td>${driver.car_number}</td>
+            <td>${driver.tech_passport_number}</td>
+            <td>
+                <button class="edit-btn" onclick="editDriver(${driver.id})">Tahrirlash</button>
+                <button class="delete-btn" onclick="deleteDriver(${driver.id})">O'chirish</button>
+            </td>
+        `;
+        driversList.appendChild(row);
+    });
+}
+
+// Dastlabki ma'lumotlarni ko'rsatish
+displayDrivers();
+</script>
+
+</body>
+</html>
